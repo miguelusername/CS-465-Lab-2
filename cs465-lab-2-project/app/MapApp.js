@@ -116,7 +116,7 @@ import React, { useState, useRef } from "react";
                             attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a>'
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         />
-                        <LocationMap adding={adding} onMapClick={handleMapClick} />
+                        <LocationMap MapComponents={MapComponents} adding={adding} onMapClick={handleMapClick} />
                         {locations.map((loc, idx) => (
                             <MapComponents.Marker key={idx} position={loc.latlng}>
                                 <MapComponents.Popup>
