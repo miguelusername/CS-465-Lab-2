@@ -6,7 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "export": "next export",
+  "export": "node -e \"console.log('next export is deprecated; build uses output: \"export\" in next.config.mjs')\"",
     "lint": "eslint"
   },
   "dependencies": {
