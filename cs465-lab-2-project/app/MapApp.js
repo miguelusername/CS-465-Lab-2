@@ -84,10 +84,12 @@ import React, { useState, useRef } from "react";
 
     // LocationMap component for map click events
     function LocationMap({ adding, onMapClick, MapComponents }) {
-        const { useMapEvents } = MapComponents || {};
+        // MapComponents is provided only when leaflet/react-leaflet are loaded.
+        // Call the hook unconditionally here (it will always be a function when
+        // this component is rendered), and guard behavior inside the handler.
+        const { useMapEvents } = MapComponents;
 
-        // If useMapEvents isn’t ready yet, do nothing safely
-        useMapEvents?.({
+        useMapEvents({
             click: (e) => {
                 if (adding) {
                     onMapClick(e.latlng);

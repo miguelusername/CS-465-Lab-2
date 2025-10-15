@@ -1,0 +1,10 @@
+services:
+  - type: static
+    name: cs465-lab-2-project
+    repo: https://github.com/miguelusername/CS-465-Lab-2
+    branch: main
+    root_dir: cs465-lab-2-project
+    build_command: "npm ci && npm run build && npm run export"
+    publish_command: ""
+    publish_dir: out
+    env: {}
