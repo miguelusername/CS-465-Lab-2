@@ -4,33 +4,36 @@ import React, { useState, useRef } from "react";
 //Note:
 //This is the heart of the app. It uses react-leaflet to display the map and make markers
 
-export default function MapApp() {
-    // Dynamically import react-leaflet and leaflet only on client
-    const [leafletLoaded, setLeafletLoaded] = useState(false);
-    const [MapComponents, setMapComponents] = useState(null);
-    const [L, setL] = useState(null);
+    export default function MapApp() {
+        // Dynamically import react-leaflet and leaflet only on client
+        const [leafletLoaded, setLeafletLoaded] = useState(false);
+        const [MapComponents, setMapComponents] = useState(null);
+        const [L, setL] = useState(null);
 
-    // Load Leaflet and react-leaflet on mount
-    React.useEffect(() => {
-        (async () => {
-            const leaflet = await import("leaflet");
-            const { MapContainer, TileLayer, Marker, Popup, useMapEvents } = await import("react-leaflet");
-            await import("leaflet/dist/leaflet.css");
-            // Fix default marker icon issue in Leaflet + React
-            delete leaflet.Icon.Default.prototype._getIconUrl;
-            leaflet.Icon.Default.mergeOptions({
-                iconRetinaUrl:
-                    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-                iconUrl:
-                    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-                shadowUrl:
-                    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-            });
-            setMapComponents({ MapContainer, TileLayer, Marker, Popup, useMapEvents });
-            setL(leaflet);
-            setLeafletLoaded(true);
-        })();
+        // Load Leaflet and react-leaflet on mount
+        React.useEffect(() => {
+    let cancelled = false;
+    (async () => {
+        const leaflet = await import("leaflet");
+        const { MapContainer, TileLayer, Marker, Popup, useMapEvents } = await import("react-leaflet");
+        await import("leaflet/dist/leaflet.css");
+
+        if (cancelled) return; // prevent setState after unmount
+
+        delete leaflet.Icon.Default.prototype._getIconUrl;
+        leaflet.Icon.Default.mergeOptions({
+            iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+            iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+            shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+        });
+
+        setMapComponents({ MapContainer, TileLayer, Marker, Popup, useMapEvents });
+        setL(leaflet);
+        setLeafletLoaded(true);
+    })();
+    return () => { cancelled = true; };
     }, []);
+
 
     const [adding, setAdding] = useState(true);
     const [locations, setLocations] = useState([]);
@@ -80,18 +83,21 @@ export default function MapApp() {
     };
 
     // LocationMap component for map click events
-    function LocationMap({ adding, onMapClick }) {
-        if (!MapComponents) return null;
-        const { useMapEvents } = MapComponents;
-        useMapEvents({
+    function LocationMap({ adding, onMapClick, MapComponents }) {
+        const { useMapEvents } = MapComponents || {};
+
+        // If useMapEvents isn’t ready yet, do nothing safely
+        useMapEvents?.({
             click: (e) => {
                 if (adding) {
                     onMapClick(e.latlng);
                 }
             },
         });
+
         return null;
     }
+
 
     //The actual map. Utilizes openstreetmap API
     return (
